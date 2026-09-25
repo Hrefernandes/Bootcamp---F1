@@ -7,7 +7,10 @@
        java -Dstdout.encoding=UTF-8 -cp out Main      (la production)
    ========================================================================= */
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
 
 public class Classement {
 
@@ -17,17 +20,54 @@ public class Classement {
     // 1. pointsPourPosition(position) : points marqués pour cette position.
     //    1 -> 25, 2 -> 18, ..., 10 -> 1. Au-delà de la 10e place : 0.
     //    Un abandon vaut la position 0, donc 0 point.
-    public static int pointsPourPosition(int position) {
-        // À COMPLÉTER
-        return 0;
-    }
+   public static int pointsPourPosition(int position) {
+	 position -= 1; //on met le bon index
+     if(position > 9 | position == -1) { // si il est plus de 10 ème ou qu'il est position 0
+    	 return 0;
+     }
+     return BAREME[position];
+ }
 
     // 2. classementPilotes(lignes) : un Resultat par pilote, avec ses points,
     //    ses victoires (position 1) et ses 2e places, trié par :
     //    points décroissants, puis victoires, puis 2e places, puis nom (A→Z).
     public static List<Resultat> classementPilotes(List<Ligne> lignes) {
-        // À COMPLÉTER
-        return null;
+
+        HashMap<String, Resultat> parPilote = new HashMap<>(); // enleve les doublons et trie les data
+
+        for (Ligne ligne : lignes){
+            Resultat r = parPilote.get(ligne.pilote()); // recupère les infos pilote
+
+            if(r == null) { // si non trouvé
+                r = new Resultat(ligne.pilote(), ligne.ecurie()); // on les créer
+                parPilote.put(ligne.pilote(), r);
+            }
+
+            r.points += pointsPourPosition(ligne.position());
+            if (ligne.position() == 1) {
+                r.victoires++;
+            } else if (ligne.position() == 2) {
+                r.deuxiemes++;
+            }
+        }
+
+        List<Resultat> classement = new ArrayList<>(parPilote.values()); // ArrayList final qu'on va trier
+
+        classement.sort((a, b) -> {
+            
+            if (a.points != b.points) { // du plus grand au plus petit
+                return Integer.compare(b.points, a.points);
+            }
+
+            if (a.victoires != b.victoires) { // si égalité compare les victoires
+                return Integer.compare(b.victoires, a.victoires);
+            }
+
+            return a.nom.compareTo(b.nom); // nom de A à Z si toujours égalité
+        });
+
+        return classement;
+
     }
 
     // 3. classementEcuries(pilotes) : additionne les points, victoires et
